@@ -39,6 +39,7 @@ classifiers = [
 pytest = "^8.4.1"
 pytest-django = "^4.11.1"
 ruff = "^0.12.1"
+psycopg = {extras = ["binary"], version = "^3.2.9"}
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
@@ -85,3 +86,6 @@ ignore = [
     "RET508", # superfluous-else-break
     "B027",   # empty-method-without-abstract-decorator
 ]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.test_project.settings"
