@@ -14,9 +14,11 @@ requires-python = ">=3.9"
 dependencies = [
     "django-tenants (>=3.8)"
 ]
-repository = "https://github.com/xelixdev/django-tenants-smart-executor"
 keywords = ["django", "django-tenants", "migrations"]
 packages = [{include = "django_tenants_smart_executor"}]
+
+[project.urls]
+"Repository" = "https://github.com/xelixdev/django-tenants-smart-executor"
 
 
 [tool.poetry]
