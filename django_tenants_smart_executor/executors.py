@@ -10,18 +10,41 @@ import functools
 import logging
 import multiprocessing
 from collections.abc import Iterable
+from contextlib import ContextDecorator
 from typing import Any
 
 import django_tenants.migration_executors
 from django.conf import settings
-from django.db import connection
+from django.db import connection, connections
 from django.db.migrations.executor import MigrationExecutor
 from django.db.migrations.recorder import MigrationRecorder
 from django_tenants.migration_executors.base import run_migrations
 from django_tenants.signals import schema_migrated
-from django_tenants.utils import schema_context
+from django_tenants.utils import get_tenant_database_alias
 
 logger = logging.getLogger("django_tenants_smart_executor")
+
+
+class schema_context_without_public(ContextDecorator):  # noqa: N801
+    """
+    Like schema_context, but without public schema.
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.schema_name = args[0]
+        self.database = kwargs.get("database", get_tenant_database_alias())
+        super().__init__()
+
+    def __enter__(self):
+        self.connection = connections[self.database]
+        self.previous_tenant = connection.tenant
+        self.connection.set_schema(self.schema_name, include_public=False)
+
+    def __exit__(self, *exc):
+        if self.previous_tenant is None:
+            self.connection.set_schema_to_public()
+        else:
+            self.connection.set_tenant(self.previous_tenant)
 
 
 def needs_migrations(nodes: set[tuple[str, str]], schema_name: str, options: dict) -> bool:
@@ -35,8 +58,12 @@ def needs_migrations(nodes: set[tuple[str, str]], schema_name: str, options: dic
 
     migrated_already: set[tuple[str, str]]
 
-    with schema_context(schema_name):
-        migrated_already = set(MigrationRecorder(connection=connection).applied_migrations().keys())
+    # need to exclude public schema so if there's no migration table it doesn't pick up the one in public
+    with schema_context_without_public(schema_name):
+        migration_recorder = MigrationRecorder(connection=connection)
+        if not migration_recorder.has_table():
+            return True
+        migrated_already = set(migration_recorder.applied_migrations().keys())
 
         for node in nodes:
             if node not in migrated_already:

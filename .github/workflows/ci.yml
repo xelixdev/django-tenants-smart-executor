@@ -25,7 +25,7 @@ jobs:
       - uses: pre-commit/action@v3.0.1
 
   test:
-    name: test ${{ matrix.py }}
+    name: Test on Python ${{ matrix.py }}
     runs-on: ubuntu-latest
 
     strategy:
@@ -63,3 +63,92 @@ jobs:
         run: python -m pip install tox-gh
       - name: Run test suite
         run: tox
+
+  migrations-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15.2
+        env:
+          POSTGRES_USER: ${{ env.DB_USER }}
+          POSTGRES_PASSWORD: ${{ env.DB_PASSWORD }}
+          POSTGRES_DB: ${{ env.DB_NAME }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    strategy:
+      fail-fast: false
+      matrix:
+        py:
+          - "3.13"
+          - "3.12"
+          - "3.11"
+          - "3.10"
+          - "3.9"
+    name: Check migrations on Python ${{ matrix.py }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup python for test ${{ matrix.py }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.py }}
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+      - name: Install Deps
+        run: |
+          poetry install
+      - name: Run Initial Migrations
+        run: |
+          poetry run python tests/manage.py migrate_schemas >initial_output.txt 2>&1
+          echo "The output was"
+          cat initial_output.txt
+          echo "The expected output is"
+          cat tests/expected_initial_output.txt
+          echo "Diff:"
+          diff initial_output.txt tests/expected_initial_output.txt
+      - name: Create a dummy organisation
+        run: |
+          poetry run python tests/manage.py create_client test >create_output.txt 2>&1
+          echo "The output was"
+          cat create_output.txt
+          echo "The expected output is"
+          cat tests/expected_create_output.txt
+          echo "Diff:"
+          diff create_output.txt tests/expected_create_output.txt
+      - name: Test migrate schemas (standard) if all migrated
+        run: |
+          poetry run python tests/manage.py migrate_schemas >standard_output.txt 2>&1
+          echo "The output was"
+          cat standard_output.txt
+          echo "The expected output is"
+          cat tests/expected_standard_output.txt
+          echo "Diff:"
+          diff standard_output.txt tests/expected_standard_output.txt
+
+      - name: Test migrate schemas (multiprocessing) if all migrated
+        run: |
+          poetry run python tests/manage.py migrate_schemas --executor multiprocessing >multiprocessing_output.txt 2>&1
+          echo "The output was"
+          cat multiprocessing_output.txt
+          echo "The expected output is"
+          cat tests/expected_multiprocessing_output.txt
+          echo "Diff:"
+          diff multiprocessing_output.txt tests/expected_multiprocessing_output.txt
+          
+      - name: Upload migration test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-test-outputs-py${{ matrix.py }}
+          path: |
+            initial_output.txt
+            create_output.txt
+            standard_output.txt
+            multiprocessing_output.txt
+          retention-days: 7
