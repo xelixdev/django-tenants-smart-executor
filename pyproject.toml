@@ -1,0 +1,30 @@
+[project]
+name = "django-tenants-smart-executor"
+version = "0.1.0"
+description = "Executors for django-tenants which check whether any migrations need running before running them, making it faster."
+authors = [
+    {name = "Mikuláš Poul",email = "mikulas.poul@xelix.com"}
+]
+license = "MIT"
+license-files = [
+    "LICENSE",
+]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "django-tenants (>=3.8)"
+]
+repository = "https://github.com/xelixdev/django-tenants-smart-executor"
+keywords = ["django", "django-tenants", "migrations"]
+packages = [{include = "django_tenants_smart_executor"}]
+
+
+[tool.poetry]
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.4.1"
+pytest-django = "^4.11.1"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
