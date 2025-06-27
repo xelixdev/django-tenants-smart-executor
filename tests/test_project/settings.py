@@ -94,6 +94,8 @@ DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
 TENANT_MODEL = "public_app.Client"  # app.Model
 TENANT_DOMAIN_MODEL = "public_app.Domain"  # app.Model
 
+GET_EXECUTOR_FUNCTION = "django_tenants_smart_executor.load_executor"
+
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 

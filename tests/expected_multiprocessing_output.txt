@@ -1,0 +1,2 @@
+No migrations needed for schema public, only triggering signals
+No migrations needed for schema test, only triggering signals

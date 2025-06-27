@@ -85,6 +85,7 @@ ignore = [
     "RET507", # superfluous-else-continue
     "RET508", # superfluous-else-break
     "B027",   # empty-method-without-abstract-decorator
+    "N999",   # invalid-module-name
 ]
 
 [tool.pytest.ini_options]
