@@ -32,6 +32,7 @@ jobs:
       fail-fast: false
       matrix:
         py:
+          - "3.14"
           - "3.13"
           - "3.12"
           - "3.11"
@@ -52,16 +53,14 @@ jobs:
           --health-retries=5
 
     steps:
-      - name: Setup python for test ${{ matrix.py }}
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.py }}
       - uses: actions/checkout@v7
-
-      - name: Install tox-gh
-        run: python -m pip install tox-gh
-      - name: Run test suite
-        run: tox
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Install tox
+        run: |
+          uv tool install --python ${{ matrix.py }} tox --with tox-gh
+      - name: Run tests
+        run: tox --skip-missing-interpreters
 
   migrations-tests:
     runs-on: ubuntu-latest
@@ -83,11 +82,21 @@ jobs:
       fail-fast: false
       matrix:
         py:
+          - "3.14"
           - "3.13"
           - "3.12"
           - "3.11"
           - "3.10"
-    name: Check migrations on Python ${{ matrix.py }}
+        django-tenants:
+          - "3.8.0"
+          - "3.9.0"
+          - "3.10.2"
+        exclude:
+          - py: 3.14
+            django-tenants: "3.8.0"
+          - py: 3.14
+            django-tenants: "3.9.0"
+    name: Check migrations on Python ${{ matrix.py }} and django-tenants ${{ matrix.django-tenants }}
 
     steps:
       - name: Checkout
@@ -101,6 +110,7 @@ jobs:
       - name: Install Deps
         run: |
           poetry install
+          poetry run pip install django-tenants==${{ matrix.django-tenants }}
       - name: Run Initial Migrations
         run: |
           poetry run python tests/manage.py migrate_schemas >initial_output.txt 2>&1
@@ -143,7 +153,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: migration-test-outputs-py${{ matrix.py }}
+          name: migration-test-outputs-py${{ matrix.py }}-dt${{ matrix.django-tenants }}
           path: |
             initial_output.txt
             create_output.txt

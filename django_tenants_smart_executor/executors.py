@@ -5,7 +5,6 @@ __all__ = [
     "SmartMultiprocessingExecutor",
 ]
 
-
 import functools
 import logging
 import multiprocessing
@@ -21,6 +20,15 @@ from django.db.migrations.recorder import MigrationRecorder
 from django_tenants.migration_executors.base import run_migrations
 from django_tenants.signals import schema_migrated
 from django_tenants.utils import get_tenant_database_alias
+
+try:
+    from django_tenants.migration_executors.multiproc import get_pool
+except ImportError:  # get_pool is only available 3.10.2+
+
+    def get_pool():
+        processes = getattr(settings, "TENANT_MULTIPROCESSING_MAX_PROCESSES", 4)
+        return multiprocessing.Pool(processes=processes)
+
 
 logger = logging.getLogger("django_tenants_smart_executor")
 
@@ -150,7 +158,6 @@ class SmartMultiprocessingExecutor(NeedsMigrationsMixin, django_tenants.migratio
         self.run_public(nodes, tenants)
 
         if tenants:
-            processes = getattr(settings, "TENANT_MULTIPROCESSING_MAX_PROCESSES", 4)
             chunks = getattr(settings, "TENANT_MULTIPROCESSING_CHUNKS", 2)
 
             from django.db import connections
@@ -162,5 +169,5 @@ class SmartMultiprocessingExecutor(NeedsMigrationsMixin, django_tenants.migratio
             run_migrations_p = functools.partial(
                 run_migrations_percent, self.args, self.options, self.codename, len(tenants), nodes
             )
-            p = multiprocessing.Pool(processes=processes)
+            p = get_pool()
             p.map(run_migrations_p, enumerate(tenants), chunks)
