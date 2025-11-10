@@ -89,6 +89,9 @@ jobs:
           - "3.12"
           - "3.11"
           - "3.10"
+        django-tenants:
+          - "3.8.0"
+          - "3.9.0"
     name: Check migrations on Python ${{ matrix.py }}
 
     steps:
@@ -103,6 +106,7 @@ jobs:
       - name: Install Deps
         run: |
           poetry install
+          poetry run pip install django-tenants==${{ matrix.django-tenants }}
       - name: Run Initial Migrations
         run: |
           poetry run python tests/manage.py migrate_schemas >initial_output.txt 2>&1
@@ -145,7 +149,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v5
         with:
-          name: migration-test-outputs-py${{ matrix.py }}
+          name: migration-test-outputs-py${{ matrix.py }}-dt${{ matrix.django-tenants }}
           path: |
             initial_output.txt
             create_output.txt
