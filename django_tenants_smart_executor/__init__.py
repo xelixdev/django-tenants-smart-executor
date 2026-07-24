@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-__all__ = ["load_executor", "SmartMultiprocessingExecutor", "SmartStandardExecutor"]
+__all__ = ["load_executor", "LimitStateToSchema", "SmartMultiprocessingExecutor", "SmartStandardExecutor"]
 
 
 import django_tenants.migration_executors
 
 from .executors import (
+    LimitStateToSchema,
     SmartMultiprocessingExecutor,
     SmartStandardExecutor,
 )

@@ -1,7 +1,7 @@
 [project]
 name = "django-tenants-smart-executor"
-version = "0.2.0"
-description = "Executors for django-tenants which check whether any migrations need running before running them, making it faster."
+version = "0.3.0"
+description = "Executors for django-tenants which speed up the migrations!"
 authors = [
     {name = "Mikuláš Poul", email = "mikulas.poul@xelix.com"}
 ]
