@@ -94,6 +94,9 @@ jobs:
         django:
           - "5.2"
           - "6.0"
+        limit-state-to-schema:
+          - ""
+          - "full"
         exclude:
           - py: 3.14
             django-tenants: "3.8.0"
@@ -103,7 +106,9 @@ jobs:
             django: "6.0"
           - py: "3.11"
             django: "6.0"
-    name: Check migrations on Python ${{ matrix.py }}, django-tenants ${{ matrix.django-tenants }} and Django ${{ matrix.django }}
+    name: Check migrations on Python ${{ matrix.py }}, django-tenants ${{ matrix.django-tenants }}, Django ${{ matrix.django }} and limit state to schema '${{ matrix.limit-state-to-schema }}'
+    env:
+      SMART_EXECUTOR_LIMIT_STATE_TO_SCHEMA: ${{ matrix.limit-state-to-schema }}
 
     steps:
       - name: Checkout
@@ -161,7 +166,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: migration-test-outputs-py${{ matrix.py }}-dt${{ matrix.django-tenants }}-dj${{ matrix.django }}
+          name: migration-test-outputs-py${{ matrix.py }}-dt${{ matrix.django-tenants }}-dj${{ matrix.django }}-limit${{ matrix.limit-state-to-schema }}
           path: |
             initial_output.txt
             create_output.txt

@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from pathlib import Path
 
+from django_tenants_smart_executor.executors import LimitStateToSchema
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -95,6 +97,12 @@ TENANT_MODEL = "public_app.Client"  # app.Model
 TENANT_DOMAIN_MODEL = "public_app.Domain"  # app.Model
 
 GET_EXECUTOR_FUNCTION = "django_tenants_smart_executor.load_executor"
+
+_smart_executor_limit_state_to_schema = os.environ.get("SMART_EXECUTOR_LIMIT_STATE_TO_SCHEMA")
+SMART_EXECUTOR_LIMIT_STATE_TO_SCHEMA = (
+    LimitStateToSchema(_smart_executor_limit_state_to_schema) if _smart_executor_limit_state_to_schema else None
+)
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
