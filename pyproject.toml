@@ -1,6 +1,6 @@
 [project]
 name = "django-tenants-smart-executor"
-version = "0.2.0"
+version = "0.3.0"
 description = "Executors for django-tenants which check whether any migrations need running before running them, making it faster."
 authors = [
     {name = "Mikuláš Poul", email = "mikulas.poul@xelix.com"}
@@ -90,3 +90,6 @@ ignore = [
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "tests.test_project.settings"
+
+[tool.coverage.run]
+source = ["django_tenants_smart_executor"]

@@ -3,6 +3,7 @@ from __future__ import annotations
 __all__ = [
     "SmartStandardExecutor",
     "SmartMultiprocessingExecutor",
+    "MIGRATING_TENANT",
 ]
 
 import functools
@@ -10,6 +11,7 @@ import logging
 import multiprocessing
 from collections.abc import Iterable
 from contextlib import ContextDecorator
+from contextvars import ContextVar
 from typing import Any
 
 import django_tenants.migration_executors
@@ -29,6 +31,8 @@ except ImportError:  # get_pool is only available 3.10.2+
         processes = getattr(settings, "TENANT_MULTIPROCESSING_MAX_PROCESSES", 4)
         return multiprocessing.Pool(processes=processes)
 
+
+MIGRATING_TENANT: ContextVar[bool] = ContextVar("MIGRATING_TENANT", default=False)
 
 logger = logging.getLogger("django_tenants_smart_executor")
 
@@ -118,6 +122,8 @@ class SmartStandardExecutor(NeedsMigrationsMixin, django_tenants.migration_execu
 
         self.run_public(nodes, tenants)
 
+        MIGRATING_TENANT.set(True)
+
         for idx, schema_name in enumerate(tenants):
             if needs_migrations(nodes, schema_name, self.options):
                 run_migrations(self.args, self.options, self.codename, schema_name, idx=idx, count=len(tenants))
@@ -138,6 +144,8 @@ def run_migrations_percent(
     them, or trigger signals.
     """
     idx, schema_name = idx_schema_name
+
+    MIGRATING_TENANT.set(True)
 
     if needs_migrations(nodes, schema_name, options):
         return run_migrations(args, options, codename, schema_name, allow_atomic=False, idx=idx, count=count)
