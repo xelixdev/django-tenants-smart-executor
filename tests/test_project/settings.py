@@ -95,6 +95,7 @@ TENANT_MODEL = "public_app.Client"  # app.Model
 TENANT_DOMAIN_MODEL = "public_app.Domain"  # app.Model
 
 GET_EXECUTOR_FUNCTION = "django_tenants_smart_executor.load_executor"
+SMART_EXECUTOR_LIMIT_STATE_TO_SCHEMA = os.environ.get("SMART_EXECUTOR_LIMIT_STATE_TO_SCHEMA")
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

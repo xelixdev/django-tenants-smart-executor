@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.10'
       - uses: pre-commit/action@v3.0.1
@@ -91,18 +91,30 @@ jobs:
           - "3.8.0"
           - "3.9.0"
           - "3.10.2"
+        django:
+          - "5.2"
+          - "6.0"
+        limit-state-to-schema:
+          - ""
+          - "full"
         exclude:
           - py: 3.14
             django-tenants: "3.8.0"
           - py: 3.14
             django-tenants: "3.9.0"
-    name: Check migrations on Python ${{ matrix.py }} and django-tenants ${{ matrix.django-tenants }}
+          - py: "3.10"
+            django: "6.0"
+          - py: "3.11"
+            django: "6.0"
+    name: Check migrations on Python ${{ matrix.py }}, django-tenants ${{ matrix.django-tenants }}, Django ${{ matrix.django }} and limit state to schema '${{ matrix.limit-state-to-schema }}'
+    env:
+      SMART_EXECUTOR_LIMIT_STATE_TO_SCHEMA: ${{ matrix.limit-state-to-schema }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v7
       - name: Setup python for test ${{ matrix.py }}
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.py }}
       - name: Install Poetry
@@ -111,6 +123,7 @@ jobs:
         run: |
           poetry install
           poetry run pip install django-tenants==${{ matrix.django-tenants }}
+          poetry run pip install "https://github.com/django/django/archive/stable/${{ matrix.django }}.x.tar.gz#egg=django"
       - name: Run Initial Migrations
         run: |
           poetry run python tests/manage.py migrate_schemas >initial_output.txt 2>&1
@@ -153,7 +166,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: migration-test-outputs-py${{ matrix.py }}-dt${{ matrix.django-tenants }}
+          name: migration-test-outputs-py${{ matrix.py }}-dt${{ matrix.django-tenants }}-dj${{ matrix.django }}-limit${{ matrix.limit-state-to-schema }}
           path: |
             initial_output.txt
             create_output.txt
