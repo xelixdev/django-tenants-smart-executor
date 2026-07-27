@@ -2,7 +2,9 @@
 
 import django.db.models.deletion
 import django_tenants.postgresql_backend.base
-from django.db import migrations, models
+from django.db import models
+
+from django_tenants_smart_executor import migrations
 
 
 class Migration(migrations.Migration):

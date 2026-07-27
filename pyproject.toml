@@ -90,3 +90,6 @@ ignore = [
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "tests.test_project.settings"
+
+[tool.coverage.run]
+source = ["django_tenants_smart_executor"]
