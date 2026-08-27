@@ -1,6 +1,6 @@
 [project]
 name = "django-tenants-smart-executor"
-version = "0.3.0"
+version = "0.3.1"
 description = "Executors for django-tenants which check whether any migrations need running before running them, making it faster."
 authors = [
     {name = "Mikuláš Poul", email = "mikulas.poul@xelix.com"}
@@ -37,7 +37,7 @@ classifiers = [
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.1"
-pytest-django = "^4.11.1"
+pytest-django = ">=4.14.0"
 ruff = "^0.15.22"
 psycopg = {extras = ["binary"], version = "^3.2.9"}
 
