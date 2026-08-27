@@ -94,6 +94,7 @@ jobs:
         django:
           - "5.2"
           - "6.0"
+          - "6.1"
         limit-state-to-schema:
           - ""
           - "full"
@@ -104,8 +105,12 @@ jobs:
             django-tenants: "3.9.0"
           - py: "3.10"
             django: "6.0"
+          - py: "3.10"
+            django: "6.1"
           - py: "3.11"
             django: "6.0"
+          - py: "3.11"
+            django: "6.1"
     name: Check migrations on Python ${{ matrix.py }}, django-tenants ${{ matrix.django-tenants }}, Django ${{ matrix.django }} and limit state to schema '${{ matrix.limit-state-to-schema }}'
     env:
       SMART_EXECUTOR_LIMIT_STATE_TO_SCHEMA: ${{ matrix.limit-state-to-schema }}

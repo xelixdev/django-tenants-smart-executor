@@ -37,7 +37,7 @@ classifiers = [
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.1"
-pytest-django = "^4.11.1"
+pytest-django = ">=4.14.0"
 ruff = "^0.15.22"
 psycopg = {extras = ["binary"], version = "^3.2.9"}
 
